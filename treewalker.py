@@ -1,5 +1,5 @@
 """
-Gets a directory path as input and visits each leaf (source file) prepending boilerplate comments to it.
+Gets a directory or file path as input and visits each leaf (source file) prepending boilerplate comments to it.
 Can be recursive.
 """
 
@@ -11,24 +11,24 @@ from math import ceil
 
 CPP_NAME = 'C++'
 CPP_STYLE = {
-    'start' : '/*',
-    'filler' : '*',
-    'end' : '*/'}
+    'start': '/*',
+    'filler': '*',
+    'end': '*/'}
 CPP_EXTENSIONS = ( 'cpp', 'cc', 'h', 'c' )
 
 CSHARP_NAME = 'C#'
 CSHARP_STYLE = {
-    'start' : '//',
-    'filler' : '*',
-    'end' : '//'
+    'start': '//',
+    'filler' :'*',
+    'end': '//'
 }
 CSHARP_EXTENSIONS = ('cs')
 
 PYTHON_NAME = 'Python'
 PYTHON_STYLE = {
-    'start' : '"""',
-    'filler' : '"',
-    'end' : '"""'}
+    'start': '"""',
+    'filler': '"',
+    'end': '"""'}
 PYTHON_EXTENSIONS = ('py')
 
 HEADER_DISTINCTIVE = '@' * 3
@@ -68,44 +68,45 @@ class HeadingGenerator:
         :param file: open stream to file to edit
         :return: nothing
         """
-
         file_contents = file.read()
         file.seek(0, 0)
         file.write(blocks + file_contents)
 
-    def insert_heading(self, file, heading, style):
+    def insert_heading(self, file, heading):
         """
         Inserts a string of text at the beginning of a file formatted as a constant-width block.
         :param file:
         :param heading:
-        :param style:
         :return:
         """
-        MAX_COLUMNS = 70
-        distinctive = style['start'] + HEADER_DISTINCTIVE + style['filler'] * (self.get_filling_amount(style, HEADER_DISTINCTIVE, MAX_COLUMNS) + 2) + style['end']
-        empty_line = self.get_filling_line(style, MAX_COLUMNS, ' ')
-        filename_line = self.get_block_line(style, os.path.split(file.name)[1], MAX_COLUMNS, align='centre')
-        author_line = self.get_block_line(style, 'Author: ' + heading.author, MAX_COLUMNS)
-        copyright_line = self.get_block_line(style, 'Copyright (C) ' + str(datetime.datetime.now().year), MAX_COLUMNS)
-        licence_line = self.get_block_line(style, 'Licence: ' + heading.licence, MAX_COLUMNS)
-        description_line = self.get_block_line(style, heading.description, MAX_COLUMNS)
-        remarks_line = self.get_block_line(style, 'Remarks: ' + heading.remarks, MAX_COLUMNS)
-        filled_line = self.get_filling_line(style, MAX_COLUMNS)
+        max_columns = 70
+        distinctive = self.language.style['start'] + HEADER_DISTINCTIVE + self.language.style['filler'] \
+                                                                          * (self.get_filling_amount(HEADER_DISTINCTIVE, max_columns) - 1) + self.language.style['end']
+        empty_line = self.get_filling_line(max_columns, ' ')
+        filename_line = self.get_block_line(os.path.split(file.name)[1], max_columns, align='centre')
+        author_line = self.get_block_line('Author: ' + heading.author, max_columns)
+        copyright_line = self.get_block_line('Copyright (C) ' + str(datetime.datetime.now().year), max_columns)
+        licence_line = self.get_block_line('Licence: ' + heading.licence, max_columns)
+        description_block = self.get_block(heading.description, max_columns)
+        remarks_block = self.get_block('Remarks: ' + heading.remarks if heading.remarks else '', max_columns)
+        filled_line = self.get_filling_line(max_columns)
 
         lines =\
-            [distinctive, empty_line, filename_line, empty_line, description_line, remarks_line, empty_line, author_line, copyright_line, licence_line, filled_line]
+            [distinctive, empty_line, filename_line, empty_line, description_block, remarks_block, empty_line, author_line, copyright_line, licence_line, filled_line]
         block = os.linesep.join([line for line in lines if line]) + os.linesep * 2
         self.prepend_text(file, block)
 
-    def get_filling_line(self, style, width, filler=''):
-        filling = style['filler']
-        if filler:
-            filling = filler
-        return self.get_block_line(style, filling * ceil(width - (len(style['start']) + len(style['end']))), width)
+    def get_filling_line(self, width, filler=''):
+        filling = filler if filler else self.language.style['filler']
+        return self.get_block_line(filling * ceil(width - (len(self.language.style['start']) + len(self.language.style['end']) + 2) / len(filling)), width)
 
-    def get_block_line(self, style, text, width, align='left'):
+    def get_block(self, text, width, align='left'):
+        lines = self.split_string(text, width)
+        line_separator = ' ' + self.language.style['end'] + os.linesep + self.language.style['start'] + ' '
+        return os.linesep.join([self.get_block_line(ln, width, align) for ln in lines])
+
+    def get_block_line(self, text, width, align='left'):
         """
-        :param style:
         :param text:
         :param width:
         :param align: Alignment of the line in the block, 'left', 'centre', 'right'
@@ -116,10 +117,19 @@ class HeadingGenerator:
         if not text:
             return ''
 
-        max_txt_size_per_line = width - (len(style['start']) + len(style['end']) + 2)
-        formatted_text = text
+        line = ''
+        filling_amount = self.get_filling_amount(text, width)
+        if align == 'left':
+            line = self.language.style['start'] + ' {0} '.format(text) + ' ' * filling_amount + self.language.style['end']
+        elif align == 'right':
+            line = self.language.style['start'] + ' ' * filling_amount + ' {0} '.format(text) + self.language.style['end']
+        elif align == 'centre':
+            line = self.language.style['start'] + ' ' * ceil((filling_amount / 2)) + ' {0} '.format(text) + ' ' * ceil((filling_amount / 2)) + self.language.style['end']
+        return self.adjust_line_width(line, width)
 
-        # TODO -- Refactor into separate method.
+    def split_string(self, text, width):
+        max_txt_size_per_line = width - (len(self.language.style['start']) + len(self.language.style['end']) + 2)
+
         if len(text) > max_txt_size_per_line:
             # Split text string into multiple list elements and then join them in terms of filler and os.separator.
             # This is done to prevent line overflow and keep the width of the heading block consistent.
@@ -133,39 +143,37 @@ class HeadingGenerator:
                     endmarker = len(text) - 1
                 text_lines.append(text[startmarker:endmarker])
 
-            line_separator = ' ' + style['end'] + os.linesep + style['start'] + ' '
-            formatted_text = line_separator.join(text_lines)
+            # The last line will probably be shorter so pad it to make it the same width as the others.
+            text_lines[-1] = text_lines[-1] + ' ' * self.get_filling_amount(text_lines[-1], width)
+            return text_lines
+        else:
+            return [text]
 
-        filling_amount = self.get_filling_amount(style, formatted_text, width)
-        if align == 'left':
-            line = style['start'] + ' {0} '.format(formatted_text) + ' ' * filling_amount + style['end']
-            #if len(line) < width:
-                # Insert width - len(line) whitespaces or filler characters.
-                # TODO -- line.insert(-(len(style['end'])), ' ')
-            return line
-        elif align == 'right':
-            return style['start'] + ' ' * filling_amount + ' {0} '.format(formatted_text) + style['end']
-        elif align == 'centre':
-            return style['start'] + ' ' * ceil((filling_amount / 2)) + ' {0} '.format(formatted_text) + ' ' * ceil((filling_amount / 2)) + style['end']
+    def adjust_line_width(self, line, width):
+        line_list = list(line)
+        if len(line_list) < width:
+            # Insert padding characters until the width of the line is consistent with the rest of the block.
+            line_list.insert(-(len(self.language.style['end'])), ' ' * (width - len(line_list)))
+        elif len(line_list) > width:
+            # Locate the slice containing the extra characters and remove them from the line.
+            extrapadding_end = len(line_list) - ((len(line_list) - width) + len(self.language.style['end']) + 1)
+            extrapadding_start = extrapadding_end - (len(line_list) - width)
+            line_list[extrapadding_start:extrapadding_end + 1] = []
+        return ''.join(line_list)
 
-    def get_filling_amount(self, style, text, width):
+    def get_filling_amount(self, text, width):
         """
         Get amount of padding characters to use to get a line of the provided width.
-        :param style:
         :param text:
         :return:
         """
-        startlen = len(style['start'])
-        fillinglen = len(style['filler'])
-        endlen = len(style['end'])
-        return ceil((width - (startlen + endlen + len(text))) / fillinglen)
+        startlen = len(self.language.style['start'])
+        fillinglen = len(self.language.style['filler'])
+        endlen = len(self.language.style['end'])
+        amount = abs(ceil((width - (startlen + endlen + len(text))) / fillinglen))
+        return amount if amount < width else ceil((width - (startlen + endlen)) / fillinglen)
 
-    def sign_files(self, files, parent_dir):
-        for file in files:
-            with open(parent_dir + os.sep + file, 'r+') as fs:
-                self.insert_heading(fs, self.language.style)
-
-    def has_header(self, filestream, style):
+    def has_header(self, filestream):
         """
         Check if file has already been processed by this application before (contains a header).
         :return:
@@ -186,15 +194,16 @@ class HeadingGenerator:
         # If file is completely empty, add comments and leave.
         while not line.strip():
             line = filestream.readline()
-        #return all(map(lambda ln: ln.lstrip().startswith(style['start'] + HEADER_DISTINCTIVE), lines))
-        return line.lstrip().startswith(style['start'] + HEADER_DISTINCTIVE)
+        # return all(map(lambda ln: ln.lstrip().startswith(self.language.style['start'] + HEADER_DISTINCTIVE), lines))
+        filestream.seek(0,0)
+        return line.lstrip().startswith(self.language.style['start'] + HEADER_DISTINCTIVE)
 
     def comment_file(self, heading):
         if not os.path.isfile(self.path) or self.language.extensions.count(os.path.splitext(self.path)[1][1:]) == 0:
             return False
         with open(self.path, 'r+') as fs:
-            if not self.has_header(fs, self.language.style):
-                self.insert_heading(fs, heading, self.language.style)
+            if not self.has_header(fs):
+                self.insert_heading(fs, heading)
         return True
 
     def comment_directory(self, heading, recurse=False):
@@ -211,13 +220,13 @@ class HeadingGenerator:
                 # Open the source files for the selected language, filtering out files without an extension.
                 for match in [m for m in map(lambda f: re.match(source_file_regex, f), files) if m]:
                     with open(dirname + os.sep + match.string, 'r+') as fs:
-                        if not self.has_header(fs, self.language.style):
-                            self.insert_heading(fs, heading, self.language.style)
+                        if not self.has_header(fs):
+                            self.insert_heading(fs, heading)
         else:
             # Get all files with matching extensions in the current directory and insert headings in them.
             for ext in self.language.extensions:
                 for file in (glob.glob(self.path + os.sep + '*.' + ext)):
                     with open(file, 'r+') as fs:
-                        if not self.has_header(fs, self.language.style):
-                            self.insert_heading(fs, heading, self.language.style)
+                        if not self.has_header(fs):
+                            self.insert_heading(fs, heading)
         return True

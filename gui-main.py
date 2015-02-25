@@ -1,10 +1,8 @@
 """
-Comments Boilerplate v2.0 Tkinter GUI: a portable source file comments generator.
+Comments Boilerplate v1.0 Tkinter GUI: a portable source file comments generator.
 Add header comments to the source code files of a project.
 Can be made recursive or not. Supports various languages (C++, Python).
 """
-
-# TODO : Configure headings using XML config files. Example file in dir.
 
 import tkinter as tk
 import treewalker
@@ -100,6 +98,7 @@ class Application:
         try:
             if not generator.comment_file(heading):
                 messagebox.showerror('Incorrect path', 'You provided an invalid file path. You need to enter the full path to the file. Make sure the path points to a source file of the language you selected')
+                return
             messagebox.showinfo('Signing complete', 'The project or file was successfully signed.')
         except Exception as e:
             messagebox.showerror('Signing unsuccessful', 'The project or file could not be successfully signed. Error details: ' + str(e))
@@ -118,6 +117,7 @@ class Application:
         try:
             if not generator.comment_directory(heading, self.recurse.get()):
                 messagebox.showerror('Incorrect path', 'You provided an invalid path to the project directory. You need to enter the full path to the directory.')
+                return
             messagebox.showinfo('Signing complete', 'The project or file was successfully signed.')
         except:
             messagebox.showerror('Signing unsuccessful', 'The project or file could not be successfully signed.')
@@ -132,6 +132,6 @@ class Application:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.wm_title("Comments Boilerplate v0.9 (alpha)")
+    root.wm_title("Comments Boilerplate v1.0 beta")
     app = Application(root)
     root.mainloop()
