@@ -22,7 +22,7 @@ scheduled to be added in the near future.
 
 ## Languages Supported
 
-* C++
+* C/C++
 * Python
 * C#
 
@@ -38,14 +38,14 @@ the *Author* field and click on *Generate Project Comments*. If you want to gene
 *Recurse* checbox. Otherwise, the application will traverse the entirety of the folder provided and its subfolders, finding
 source files that correspond to the language you selected and will insert headings in all of them.
 
-## Future Features
+## Pending Features
 
 * Command-line interface.
 * Interface to other scripts to fully automate the project heading generation process.
+* Update existing headers.
 * Add header editing form validation.
 * More source code comments and type annotations to improve code readability and maintainability.
 * Support for the following languages:
-	* C compatibility
 	* Java
 	* Bash
 	* VB.NET
@@ -59,4 +59,4 @@ source files that correspond to the language you selected and will insert headin
 I'm planning on working actively on this project, adding new features, support for more languages, and obviously
 addressing any bugs that might be uncovered during the lifetime of the tool.
 
-You're more than welcome to fork this project and make pull requests to extend its functionality or add support for your favourite languages.
+However, you're more than welcome to fork this project and make pull requests to extend its functionality or add support for your favourite languages.
