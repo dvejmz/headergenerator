@@ -45,7 +45,9 @@ class Application:
         self.language_select_label = tk.Label(root, text="Language:")
         self.language_select_label.grid(row=2, column=0, sticky=tk.W, padx=10, pady=15)
         self.selected_language = tk.StringVar(root)
-        self.language_options = [treewalker.CPP_NAME, treewalker.PYTHON_NAME, treewalker.CSHARP_NAME, treewalker.JAVA_NAME, treewalker.LISP_NAME]
+        self.language_options = [treewalker.CPP_NAME, treewalker.PYTHON_NAME, treewalker.CSHARP_NAME,
+                                 treewalker.JAVA_NAME, treewalker.LISP_NAME, treewalker.LUA_NAME,
+                                 treewalker.JAVASCRIPT_NAME, treewalker.VBNET_NAME, treewalker.BASH_NAME]
         self.selected_language.set(self.language_options[0])
         self.languages_optionmenu = tk.OptionMenu(root, self.selected_language, *self.language_options)
         self.languages_optionmenu.grid(row=2, column=1, sticky=tk.W)

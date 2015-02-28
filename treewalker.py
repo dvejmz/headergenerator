@@ -51,6 +51,38 @@ LISP_STYLE = {
 }
 LISP_EXTENSIONS = ('lisp', 'cl', 'lsp')
 
+LUA_NAME = 'Lua'
+LUA_STYLE = {
+    START_KEY: '--[[',
+    FILLER_KEY: '-',
+    END_KEY: '--]]'
+}
+LUA_EXTENSIONS = ('lua')
+
+JAVASCRIPT_NAME = 'JavaScript'
+JAVASCRIPT_STYLE = {
+    START_KEY: '/*',
+    FILLER_KEY: '*',
+    END_KEY: '*/'
+}
+JAVASCRIPT_EXTENSIONS = ('js')
+
+VBNET_NAME = 'VB.NET'
+VBNET_STYLE = {
+    START_KEY: "'",
+    FILLER_KEY: "'",
+    END_KEY: "'"
+}
+VBNET_EXTENSIONS = ('vb')
+
+BASH_NAME = 'Bash'
+BASH_STYLE = {
+    START_KEY: '#',
+    FILLER_KEY: '#',
+    END_KEY: '#'
+}
+BASH_EXTENSIONS = ('sh')
+
 HEADER_DISTINCTIVE = '@' * 3
 
 class Language:
@@ -87,9 +119,33 @@ class HeadingGenerator:
             PYTHON_NAME: Language(PYTHON_NAME, PYTHON_EXTENSIONS, PYTHON_STYLE),
             CSHARP_NAME: Language(CSHARP_NAME, CSHARP_EXTENSIONS, CSHARP_STYLE),
             JAVA_NAME: Language(JAVA_NAME, JAVA_EXTENSIONS, JAVA_STYLE),
-            LISP_NAME: Language(LISP_NAME, LISP_EXTENSIONS, LISP_STYLE)
-            .get(language_string, None)
-        }
+            LISP_NAME: Language(LISP_NAME, LISP_EXTENSIONS, LISP_STYLE),
+            LUA_NAME: Language(LUA_NAME, LUA_EXTENSIONS, LUA_STYLE),
+            JAVASCRIPT_NAME: Language(JAVASCRIPT_NAME, JAVASCRIPT_EXTENSIONS, JAVA_STYLE),
+            VBNET_NAME: Language(VBNET_NAME, VBNET_EXTENSIONS, VBNET_STYLE),
+            BASH_NAME: Language(BASH_NAME, BASH_EXTENSIONS, BASH_STYLE)
+        }.get(language_string, None)
+
+    # TODO -- Complete method.
+    """
+    def detect_source_language(self, filename : str) -> Language:
+        # Extract file extension to identify the language of the source file.
+        extension = os.path.splitext(filename)[1][1:]
+        language_exts = []
+        self.language.extensions.count(extension) > 0
+        # Switch statement.
+        return {
+            CPP_EXTENSIONS: Language(CPP_NAME, CPP_EXTENSIONS, CPP_STYLE),
+            PYTHON_NAME: Language(PYTHON_NAME, PYTHON_EXTENSIONS, PYTHON_STYLE),
+            CSHARP_NAME: Language(CSHARP_NAME, CSHARP_EXTENSIONS, CSHARP_STYLE),
+            JAVA_NAME: Language(JAVA_NAME, JAVA_EXTENSIONS, JAVA_STYLE),
+            LISP_NAME: Language(LISP_NAME, LISP_EXTENSIONS, LISP_STYLE),
+            LUA_NAME: Language(LUA_NAME, LUA_EXTENSIONS, LUA_STYLE),
+            JAVASCRIPT_NAME: Language(JAVASCRIPT_NAME, JAVASCRIPT_EXTENSIONS, JAVA_STYLE),
+            VBNET_NAME: Language(VBNET_NAME, VBNET_EXTENSIONS, VBNET_STYLE),
+            BASH_NAME: Language(BASH_NAME, BASH_EXTENSIONS, BASH_STYLE)
+        }.get(filename, None)
+    """
 
     def prepend_text(self, file, blocks):
         """
@@ -140,8 +196,6 @@ class HeadingGenerator:
         :param align: Alignment of the line in the block, 'left', 'centre', 'right'
         :return:
         """
-        # FIXME -- Since we calculate the amount of padding to insert as a result of a math.ceiling operation,
-        # if the result is odd, we might not get constant-width lines.
         if not text:
             return ''
 
