@@ -9,6 +9,10 @@ import re
 import datetime
 from math import ceil
 
+START_KEY = 'start'
+FILLER_KEY = 'filler'
+END_KEY = 'end'
+
 CPP_NAME = 'C++'
 CPP_STYLE = {
     'start': '/*',
@@ -31,6 +35,22 @@ PYTHON_STYLE = {
     'end': '"""'}
 PYTHON_EXTENSIONS = ('py')
 
+JAVA_NAME = 'Java'
+JAVA_STYLE = {
+    'start': '/*',
+    'filler': '*',
+    'end': '*/'
+}
+JAVA_EXTENSIONS = ('java')
+
+LISP_NAME = 'Lisp'
+LISP_STYLE = {
+    START_KEY: ';;;',
+    FILLER_KEY: ';',
+    END_KEY: ';;;'
+}
+LISP_EXTENSIONS = ('lisp', 'cl', 'lsp')
+
 HEADER_DISTINCTIVE = '@' * 3
 
 class Language:
@@ -47,21 +67,29 @@ class Heading:
         self.remarks = remarks
 
 class HeadingGenerator:
-    def __init__(self, path, language_str):
+    def __init__(self, path: str, language_str: str):
         """
         :param path: path to root of directory to walk through
-        :return:
         """
         self.path = path
         self.language = self.get_language(language_str)
 
-    def get_language(self, language_string):
-        if language_string == CPP_NAME:
-            return Language(CPP_NAME, CPP_EXTENSIONS, CPP_STYLE)
-        elif language_string == PYTHON_NAME:
-            return Language(PYTHON_NAME, PYTHON_EXTENSIONS, PYTHON_STYLE)
-        elif language_string == CSHARP_NAME:
-            return Language(CSHARP_NAME, CSHARP_EXTENSIONS, CSHARP_STYLE)
+    def get_language(self, language_string: str) -> Language:
+        """
+        Get language object based on its string representation.
+        :param language_string:
+        :return: Language object.
+        """
+
+        # Switch statement.
+        return {
+            CPP_NAME: Language(CPP_NAME, CPP_EXTENSIONS, CPP_STYLE),
+            PYTHON_NAME: Language(PYTHON_NAME, PYTHON_EXTENSIONS, PYTHON_STYLE),
+            CSHARP_NAME: Language(CSHARP_NAME, CSHARP_EXTENSIONS, CSHARP_STYLE),
+            JAVA_NAME: Language(JAVA_NAME, JAVA_EXTENSIONS, JAVA_STYLE),
+            LISP_NAME: Language(LISP_NAME, LISP_EXTENSIONS, LISP_STYLE)
+            .get(language_string, None)
+        }
 
     def prepend_text(self, file, blocks):
         """
@@ -96,16 +124,16 @@ class HeadingGenerator:
         block = os.linesep.join([line for line in lines if line]) + os.linesep * 2
         self.prepend_text(file, block)
 
-    def get_filling_line(self, width, filler=''):
+    def get_filling_line(self, width, filler='') -> str:
         filling = filler if filler else self.language.style['filler']
         return self.get_block_line(filling * ceil(width - (len(self.language.style['start']) + len(self.language.style['end']) + 2) / len(filling)), width)
 
-    def get_block(self, text, width, align='left'):
+    def get_block(self, text, width, align='left') -> str:
         lines = self.split_string(text, width)
         line_separator = ' ' + self.language.style['end'] + os.linesep + self.language.style['start'] + ' '
         return os.linesep.join([self.get_block_line(ln, width, align) for ln in lines])
 
-    def get_block_line(self, text, width, align='left'):
+    def get_block_line(self, text, width, align='left') -> str:
         """
         :param text:
         :param width:
@@ -127,7 +155,7 @@ class HeadingGenerator:
             line = self.language.style['start'] + ' ' * ceil((filling_amount / 2)) + ' {0} '.format(text) + ' ' * ceil((filling_amount / 2)) + self.language.style['end']
         return self.adjust_line_width(line, width)
 
-    def split_string(self, text, width):
+    def split_string(self, text, width) -> list:
         max_txt_size_per_line = width - (len(self.language.style['start']) + len(self.language.style['end']) + 2)
 
         if len(text) > max_txt_size_per_line:
@@ -149,7 +177,7 @@ class HeadingGenerator:
         else:
             return [text]
 
-    def adjust_line_width(self, line, width):
+    def adjust_line_width(self, line, width) -> str:
         line_list = list(line)
         if len(line_list) < width:
             # Insert padding characters until the width of the line is consistent with the rest of the block.
@@ -161,7 +189,7 @@ class HeadingGenerator:
             line_list[extrapadding_start:extrapadding_end + 1] = []
         return ''.join(line_list)
 
-    def get_filling_amount(self, text, width):
+    def get_filling_amount(self, text, width) -> int:
         """
         Get amount of padding characters to use to get a line of the provided width.
         :param text:
@@ -173,7 +201,7 @@ class HeadingGenerator:
         amount = abs(ceil((width - (startlen + endlen + len(text))) / fillinglen))
         return amount if amount < width else ceil((width - (startlen + endlen)) / fillinglen)
 
-    def has_header(self, filestream):
+    def has_header(self, filestream) -> bool:
         """
         Check if file has already been processed by this application before (contains a header).
         :return:
@@ -198,7 +226,7 @@ class HeadingGenerator:
         filestream.seek(0,0)
         return line.lstrip().startswith(self.language.style['start'] + HEADER_DISTINCTIVE)
 
-    def comment_file(self, heading):
+    def comment_file(self, heading) -> bool:
         if not os.path.isfile(self.path) or self.language.extensions.count(os.path.splitext(self.path)[1][1:]) == 0:
             return False
         with open(self.path, 'r+') as fs:
@@ -206,7 +234,7 @@ class HeadingGenerator:
                 self.insert_heading(fs, heading)
         return True
 
-    def comment_directory(self, heading, recurse=False):
+    def comment_directory(self, heading, recurse=False) -> bool:
         if not os.path.isdir(self.path):
             return False
 

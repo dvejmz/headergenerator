@@ -14,7 +14,7 @@ from tkinter.filedialog import askdirectory, askopenfilename
 
 class Application:
 
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk):
         self.dir_name = ''
         self.file_path = ''
 
@@ -45,7 +45,7 @@ class Application:
         self.language_select_label = tk.Label(root, text="Language:")
         self.language_select_label.grid(row=2, column=0, sticky=tk.W, padx=10, pady=15)
         self.selected_language = tk.StringVar(root)
-        self.language_options = [treewalker.CPP_NAME, treewalker.PYTHON_NAME, treewalker.CSHARP_NAME]
+        self.language_options = [treewalker.CPP_NAME, treewalker.PYTHON_NAME, treewalker.CSHARP_NAME, treewalker.JAVA_NAME, treewalker.LISP_NAME]
         self.selected_language.set(self.language_options[0])
         self.languages_optionmenu = tk.OptionMenu(root, self.selected_language, *self.language_options)
         self.languages_optionmenu.grid(row=2, column=1, sticky=tk.W)
@@ -74,7 +74,7 @@ class Application:
         self.file_remarks_textbox = scrolledtext.ScrolledText(root, height=10, width=20)
         self.file_remarks_textbox.grid(row=5, column=1, sticky=tk.W, pady=10)
 
-    def validate_heading_form(self):
+    def validate_heading_form(self) -> bool:
         # At the moment this just performs one check, but in the future we might want to add more elements that need validation.
         return self.author_entry.get() != None
 
