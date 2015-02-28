@@ -25,6 +25,11 @@ scheduled to be added in the near future.
 * C/C++
 * Python
 * C#
+* Java
+* Bash
+* VB.NET
+* Lisp
+* Lua
 
 ## Usage Instructions
 
@@ -46,13 +51,7 @@ source files that correspond to the language you selected and will insert headin
 * Add header editing form validation.
 * More source code comments and type annotations to improve code readability and maintainability.
 * Support for the following languages:
-	* Java
-	* Bash
-	* VB.NET
-	* Lisp
-	* Lua
 	* Haskell
-	* JavaScript
 
 ## Note to Developers
 
