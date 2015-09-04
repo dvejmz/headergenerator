@@ -30,6 +30,7 @@ scheduled to be added in the near future.
 * VB.NET
 * Lisp
 * Lua
+* Perl
 
 ## Usage Instructions
 
