@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Comments Boilerplate v1.0 Tkinter GUI: a portable source file comments generator.
 Add header comments to the source code files of a project.
@@ -47,7 +49,7 @@ class Application:
         self.selected_language = tk.StringVar(root)
         self.language_options = [treewalker.CPP_NAME, treewalker.PYTHON_NAME, treewalker.CSHARP_NAME,
                                  treewalker.JAVA_NAME, treewalker.LISP_NAME, treewalker.LUA_NAME,
-                                 treewalker.JAVASCRIPT_NAME, treewalker.VBNET_NAME, treewalker.BASH_NAME]
+                                 treewalker.JAVASCRIPT_NAME, treewalker.VBNET_NAME, treewalker.BASH_NAME, treewalker.PERL_NAME]
         self.selected_language.set(self.language_options[0])
         self.languages_optionmenu = tk.OptionMenu(root, self.selected_language, *self.language_options)
         self.languages_optionmenu.grid(row=2, column=1, sticky=tk.W)

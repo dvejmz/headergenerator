@@ -83,6 +83,14 @@ BASH_STYLE = {
 }
 BASH_EXTENSIONS = ('sh')
 
+PERL_NAME = 'Perl'
+PERL_STYLE = {
+    START_KEY: '#',
+    FILLER_KEY: '#',
+    END_KEY: '#'
+}
+PERL_EXTENSIONS = ('pl')
+
 HEADER_DISTINCTIVE = '@' * 3
 
 class Language:
@@ -123,7 +131,8 @@ class HeadingGenerator:
             LUA_NAME: Language(LUA_NAME, LUA_EXTENSIONS, LUA_STYLE),
             JAVASCRIPT_NAME: Language(JAVASCRIPT_NAME, JAVASCRIPT_EXTENSIONS, JAVA_STYLE),
             VBNET_NAME: Language(VBNET_NAME, VBNET_EXTENSIONS, VBNET_STYLE),
-            BASH_NAME: Language(BASH_NAME, BASH_EXTENSIONS, BASH_STYLE)
+            BASH_NAME: Language(BASH_NAME, BASH_EXTENSIONS, BASH_STYLE),
+            PERL_NAME: Language(PERL_NAME, PERL_EXTENSIONS, PERL_STYLE)
         }.get(language_string, None)
 
     # TODO -- Complete method.
